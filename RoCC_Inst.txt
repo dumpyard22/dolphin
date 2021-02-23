@@ -1,0 +1,45 @@
+customX rd, rs1, rs2, 0
+- dnXrep(Report)
+rs1:
+rs2:
+rd: 0(free), 1(reserved) or 2(in use by 'Start')(2-bit)/M(M: 8-bit)
+(1 clk op)
+
+customX rd, rs1, rs2, 1
+- dnXres(Reserve)
+rs1: Output Address
+rs2: (Mutex Address)
+rd: 0(success) or 1(failed)
+(1 clk op / mutex has to be acquired in advance)
+(reset all resources and make a reservation)
+(if mutex address == 0, full stall during 'Start')
+(if already reserved or in use by 'Start', return 1)
+(if not reserved, all instructions except 'Report' or 'Release' will be ignored)
+
+customX rd, rs1, rs2, 2
+- dnXsp(Set Parameters)
+rs1: A/B/K(8-bit each)
+rs2: XO0/YO0/XO1/YO1(8-bit each)
+rd:
+(1 clk op)
+(Input Matrix #1: A*K, Input Matrix #2: K*B)
+(A<=M, B<=N, K<=M, K<=N where systolic array size is M*N)
+(X0#: row offset number of partial matrix(input matrix #))
+(Y0#: column offset number of partial matrix(input matrix #))
+
+customX rd, rs1, rs2, 3
+- dnXstrt(Start)
+rs1: Input Address 1
+rs2: Input Address 2
+rd:
+(? clk op(release CPU immediately))
+(if finished, interrupt to release mutex and the reservation)
+
+customX rd, rs1, rs2, 0x10
+- dnXrel(Release)
+rs1:
+rs2:
+rd:
+(1 clk op)
+(reset all internal flags of 'reserve' and 'start')
+(this should not be used in most of common situation)
